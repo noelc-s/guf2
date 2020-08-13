@@ -1,0 +1,103 @@
+<robot name="fly">
+
+	<link name="thorax">
+		<visual>
+			<origin rpy="0 -0.75 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://thorax.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0 -0.75 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://thorax.dae"/>
+			</geometry>
+		</collision>
+	</link>
+	
+	<link name="head">
+		<visual>
+			<origin rpy="0 0 0" xyz="0.7 0 0.4"/>
+			<geometry>
+				<mesh filename="head.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0.7 0 0.4"/>
+			<geometry>
+				<mesh filename="head.dae"/>
+			</geometry>
+		</collision>
+	</link>
+	
+	<link name="abdomen">
+		<visual>
+			<origin rpy="0 -1 0" xyz="-0.25 0 -0.2"/>
+			<geometry>
+				<mesh filename="abdomen.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0 -1 0" xyz="-0.25 0 -0.2"/>
+			<geometry>
+				<mesh filename="abdomen.dae"/>
+			</geometry>
+		</collision>
+	</link>
+	
+	<link name="wingL">
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0.6 0"/>
+			<geometry>
+				<mesh filename="wingL.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0 0.6 0"/>
+			<geometry>
+				<mesh filename="wingL.dae"/>
+			</geometry>
+		</collision>
+	</link>
+	
+	<link name="wingR">
+		<visual>
+			<origin rpy="0 0 0" xyz="0 -0.6 0"/>
+			<geometry>
+				<mesh filename="wingR.dae"/>
+			</geometry>
+		</visual>
+		<collision>
+			<origin rpy="0 0 0" xyz="0 -0.6 0"/>
+			<geometry>
+				<mesh filename="wingR.dae"/>
+			</geometry>
+		</collision>
+	</link>
+	
+	<joint name="neck" type="continuous">
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<parent link="thorax" />
+		<child link="head" />
+	</joint>
+	
+	<joint name="waist" type="continuous">
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<parent link="thorax" />
+		<child link="abdomen" />
+	</joint>
+	
+	<joint name="hingeL" type="continuous">
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<parent link="thorax" />
+		<child link="wingL" />
+	</joint>
+	
+	<joint name="hingeR" type="continuous">
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<parent link="thorax" />
+		<child link="wingR" />
+	</joint>
+
+	
+</robot>

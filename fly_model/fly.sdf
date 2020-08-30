@@ -1,0 +1,146 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+	<model name="my_model">
+		<pose>0 0 2.2 0 0 0</pose>
+		<static>true</static>
+	
+		<!-- ----------------------------------------------------------------------- -->
+		<!-- Static body segments -->
+	
+		<link name="thorax">
+			<pose>0 0 0 0 0 0</pose>
+			<collision name="collision">
+				<geometry>
+					<mesh>
+						<uri>model://thorax.dae</uri>
+					</mesh>
+				</geometry>
+			</collision>
+			<visual name="visual">
+				<geometry>
+					<mesh>
+						<uri>model://thorax.dae</uri>
+					</mesh>
+				</geometry>
+			</visual>
+		</link>
+		
+		<link name="head">
+			<pose>0.7 0 0.4 0 0 0</pose>
+			<collision name="collision">
+				<geometry>
+					<mesh>
+						<uri>model://head.dae</uri>
+					</mesh>
+				</geometry>
+			</collision>
+			<visual name="visual">
+				<geometry>
+					<mesh>
+						<uri>model://head.dae</uri>
+					</mesh>
+				</geometry>
+			</visual>
+		</link>
+		
+		<link name="abdomen">
+			<pose>-0.25 0 -0.2 0 -1 0</pose>
+			<collision name="collision">
+				<geometry>
+					<mesh>
+						<uri>model://abdomen.dae</uri>
+					</mesh>
+				</geometry>
+			</collision>
+			<visual name="visual">
+				<geometry>
+					<mesh>
+						<uri>model://abdomen.dae</uri>
+					</mesh>
+				</geometry>
+			</visual>
+		</link>
+		
+		<joint name="neck" type="fixed">
+			<parent>thorax</parent>
+            <child>head</child>
+        </joint>
+		
+		<joint name="waist" type="fixed">
+			<parent>thorax</parent>
+            <child>abdomen</child>
+        </joint>
+		
+		<!-- ----------------------------------------------------------------------- -->
+		<!-- Wings and hinges -->
+	
+		<link name="wingL">
+			<pose>0 0.6 0 0 -1.57 0</pose>
+			<collision name="collision">
+				<geometry>
+					<mesh>
+						<uri>model://wingL.dae</uri>
+					</mesh>
+				</geometry>
+			</collision>
+			<visual name="visual">
+				<geometry>
+					<mesh>
+						<uri>model://wingL.dae</uri>
+					</mesh>
+				</geometry>
+			</visual>
+			<inertial>
+				<mass>0.0001</mass>
+				<inertia>
+					<ixx>0</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0</iyy>
+					<iyz>0</iyz>
+					<izz>0</izz>
+				</inertia>
+			</inertial>
+		</link>
+		
+		<link name="wingR">
+			<pose>0 -0.6 0 0 -1.57 0</pose>
+			<collision name="collision">
+				<geometry>
+					<mesh>
+						<uri>model://wingR.dae</uri>
+					</mesh>
+				</geometry>
+			</collision>
+			<visual name="visual">
+				<geometry>
+					<mesh>
+						<uri>model://wingR.dae</uri>
+					</mesh>
+				</geometry>
+			</visual>
+			<inertial>
+				<mass>0.0001</mass>
+				<inertia>
+					<ixx>0</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0</iyy>
+					<iyz>0</iyz>
+					<izz>0</izz>
+				</inertia>
+			</inertial>
+		</link>
+		
+		<joint name="hingeL" type="spherical">
+			<parent>thorax</parent>
+            <child>wingL</child>
+		</joint>
+		
+		<joint name="hingeR" type="spherical">
+			<parent>thorax</parent>
+            <child>wingR</child>
+		</joint>
+	
+	</model>
+</sdf>

@@ -31,9 +31,18 @@ wingkin = pd.read_csv('yan.csv', sep=' ', header=None)
 wingkin = np.asarray(wingkin)
 wingkin = wingkin*np.pi/180  # Convert degrees to radians
 
+# Arrange kinematics to describe 6 DOF (3/wing)
 position,rotation,deviation = wingkin.T
-wingkinL = np.hstack((position[:,None], -deviation[:,None], -rotation[:,None]))
-wingkinR = np.hstack((-position[:,None], deviation[:,None], -rotation[:,None]))
+wingkin = np.hstack((
+    position[:,None], # Left wing
+    deviation[:,None],
+    rotation[:,None],
+    -position[:,None], # Right wing
+    -deviation[:,None],
+    rotation[:,None]
+))
+# wingkinL = np.hstack((position[:,None], deviation[:,None], rotation[:,None]))
+# wingkinR = np.hstack((-position[:,None], -deviation[:,None], rotation[:,None]))
 
 wk_len = wingkin.shape[0]
 
@@ -42,65 +51,26 @@ sign = 1
 # p.resetJointState(flyId, joint_dict["hingeL-z"], -1)
 # p.resetJointState(flyId, joint_dict["hingeR-z"], 1)
 
+# Generate joint index list for motor control
+motor_list = [
+    joint_dict["hingeL-pos"],
+    joint_dict["hingeL-dev"],
+    joint_dict["hingeL-rot"],
+    joint_dict["hingeR-pos"],
+    joint_dict["hingeR-dev"],
+    joint_dict["hingeR-rot"]
+]
+
 # Run simulation
 for i in range (10000):
 
-    # # Placeholder motion
-    # if i%100==0:
-    #     p.setJointMotorControl2(
-    #         flyId,joint_dict["hingeL-z"],
-    #         controlMode=p.VELOCITY_CONTROL,
-    #         targetVelocity=5*sign,
-    #         force=500
-    #         )
-    #     p.setJointMotorControl2(
-    #         flyId,joint_dict["hingeR-z"],
-    #         controlMode=p.VELOCITY_CONTROL,
-    #         targetVelocity=-5*sign,
-    #         force=500
-    #         )
-    #     sign = -sign
-
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeL-pos"],
+    p.setJointMotorControlArray(
+        flyId,
+        motor_list,
         controlMode=p.POSITION_CONTROL,
-        targetPosition=wingkinL[i%wk_len,0],
-        force=500
+        targetPositions=wingkin[i%wk_len,:],
+        forces=[500]*6
         )
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeL-dev"],
-        controlMode=p.POSITION_CONTROL,
-        targetPosition=-wingkinL[i%wk_len,1],
-        force=500
-        )
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeL-rot"],
-        controlMode=p.POSITION_CONTROL,
-        targetPosition=-wingkinL[i%wk_len,2],
-        force=500
-        )
-    
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeR-pos"],
-        controlMode=p.POSITION_CONTROL,
-        targetPosition=wingkinR[i%wk_len,0],
-        force=500
-        )
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeR-dev"],
-        controlMode=p.POSITION_CONTROL,
-        targetPosition=-wingkinR[i%wk_len,1],
-        force=500
-        )
-    p.setJointMotorControl2(
-        flyId,joint_dict["hingeR-rot"],
-        controlMode=p.POSITION_CONTROL,
-        targetPosition=-wingkinR[i%wk_len,2],
-        force=500
-        )
-
-    # js = p.getJointState(flyId,2)
-    # print(js)
 
     p.stepSimulation()
     time.sleep(1./240.)

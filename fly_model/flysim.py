@@ -8,6 +8,7 @@ import qarray
 # Initialize physics and scene
 physicsClient = p.connect(p.GUI) #or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
+p.resetDebugVisualizerCamera(6,50,-35,[0,0,2])
 # p.setGravity(0,0,-10)
 planeId = p.loadURDF("plane.urdf")
 
@@ -15,16 +16,26 @@ planeId = p.loadURDF("plane.urdf")
 flyStartPos = [0,0,3]
 flyStartOrientation = p.getQuaternionFromEuler([0,0,0])
 # flyId = p.loadSDF("fly.sdf")[0]
-flyId = p.loadURDF("fly.urdf", flyStartPos, flyStartOrientation)
+flyId = p.loadURDF("fly2.urdf", flyStartPos, flyStartOrientation)
 
-# Generate joint index dictionary
+# Generate link and joint index dictionaries
 num_joints = p.getNumJoints(flyId)
+link_dict = {}
 joint_dict = {}
 for i in range(num_joints):
     joint_info = p.getJointInfo(flyId, i)
     print(joint_info)
+    link_dict[joint_info[12].decode('ascii')] = joint_info[0]
     joint_dict[joint_info[1].decode('ascii')] = joint_info[0]
+print(link_dict)
 print(joint_dict)
+
+# Determine forces via quasi-steady model
+def qs_force(bodyId, linkId):
+
+    state = p.getLinkState(bodyId, linkId)
+
+    return state
 
 # Load wing kinematics from file
 wingkin = pd.read_csv('yan.csv', sep=' ', header=None)
@@ -41,17 +52,9 @@ wingkin = np.hstack((
     -deviation[:,None],
     rotation[:,None]
 ))
-# wingkinL = np.hstack((position[:,None], deviation[:,None], rotation[:,None]))
-# wingkinR = np.hstack((-position[:,None], -deviation[:,None], rotation[:,None]))
-
 wk_len = wingkin.shape[0]
 
-sign = 1
-
-# p.resetJointState(flyId, joint_dict["hingeL-z"], -1)
-# p.resetJointState(flyId, joint_dict["hingeR-z"], 1)
-
-# Generate joint index list for motor control
+# Generate joint index list for arrayed motor control
 motor_list = [
     joint_dict["hingeL-pos"],
     joint_dict["hingeL-dev"],
@@ -71,6 +74,22 @@ for i in range (10000):
         targetPositions=wingkin[i%wk_len,:],
         forces=[500]*6
         )
+
+    # p.applyExternalForce(
+    #     flyId,
+    #     link_dict["wingL"],
+    #     [0,0,1],
+    #     [0,0,0],
+    #     p.LINK_FRAME
+    #     )
+
+    # if i%10==0:
+    #     state = qs_force(flyId, link_dict["wingL"])
+    #     for i in range(num_joints):
+    #         state = p.getLinkState(flyId, i)
+    #         print(state[0])
+    #     # state = p.getLinkState(flyId, link_dict["wingL"])
+    #     # print(state[1])
 
     p.stepSimulation()
     time.sleep(1./240.)

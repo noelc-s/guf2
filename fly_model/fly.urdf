@@ -21,13 +21,11 @@
 	
 	<link name="head">
 		<visual>
-			<origin rpy="0 0 0" xyz="0.7 0 0.4"/>
 			<geometry>
 				<mesh filename="head.dae"/>
 			</geometry>
 		</visual>
 		<collision>
-			<origin rpy="0 0 0" xyz="0.7 0 0.4"/>
 			<geometry>
 				<mesh filename="head.dae"/>
 			</geometry>
@@ -36,13 +34,11 @@
 	
 	<link name="abdomen">
 		<visual>
-			<origin rpy="0 -1 0" xyz="-0.25 0 -0.2"/>
 			<geometry>
 				<mesh filename="abdomen.dae"/>
 			</geometry>
 		</visual>
 		<collision>
-			<origin rpy="0 -1 0" xyz="-0.25 0 -0.2"/>
 			<geometry>
 				<mesh filename="abdomen.dae"/>
 			</geometry>
@@ -50,13 +46,13 @@
 	</link>
 	
 	<joint name="neck" type="fixed">
-		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<origin rpy="0 0 0" xyz="0.7 0 0.4"/>
 		<parent link="thorax" />
 		<child link="head" />
 	</joint>
 	
 	<joint name="waist" type="fixed">
-		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<origin rpy="0 -1 0" xyz="-0.25 0 -0.2"/>
 		<parent link="thorax" />
 		<child link="abdomen" />
 	</joint>
@@ -70,13 +66,13 @@
 	
 	<link name="wingL">
 		<visual>
-			<origin rpy="0 -1.57 0" xyz="0 0.6 0"/>
+			<origin rpy="0 -1.57 0" xyz="0 0.1 0"/>
 			<geometry>
 				<mesh filename="wingL.dae"/>
 			</geometry>
 		</visual>
 		<collision>
-			<origin rpy="0 0 0" xyz="0 0.6 0"/>
+			<origin rpy="0 -1.57 0" xyz="0 0.1 0"/>
 			<geometry>
 				<mesh filename="wingL.dae"/>
 			</geometry>
@@ -92,13 +88,13 @@
 	
 	<link name="wingR">
 		<visual>
-			<origin rpy="0 -1.57 0" xyz="0 -0.6 0"/>
+			<origin rpy="0 -1.57 0" xyz="0 -0.1 0"/>
 			<geometry>
 				<mesh filename="wingR.dae"/>
 			</geometry>
 		</visual>
 		<collision>
-			<origin rpy="0 0 0" xyz="0 -0.6 0"/>
+			<origin rpy="0 -1.57 0" xyz="0 -0.1 0"/>
 			<geometry>
 				<mesh filename="wingR.dae"/>
 			</geometry>
@@ -112,7 +108,7 @@
 	<joint name="hingeL-pos" type="continuous">
 		<parent link="thorax" />
 		<child link="wingL-joint1" />
-		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<origin rpy="0 0 0" xyz="0 0.5 0"/>
 		<axis xyz="0 0 1"/>
 	</joint>
 	
@@ -131,7 +127,7 @@
 	</joint>
 	
 	<joint name="hingeR-pos" type="continuous">
-		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<origin rpy="0 0 0" xyz="0 -0.5 0"/>
 		<parent link="thorax" />
 		<child link="wingR-joint1" />
 		<axis xyz="0 0 1"/>

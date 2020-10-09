@@ -80,6 +80,7 @@
 		<inertial>
 			<mass value="0.01"/>
 			<inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+			<origin xyz="0 1.25 0"/>
 		</inertial>
 	</link>
 	
@@ -102,6 +103,7 @@
 		<inertial>
 			<mass value="0.01"/>
 			<inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+			<origin xyz="0 -1.25 0"/>
 		</inertial>
 	</link>
 	

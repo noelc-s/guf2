@@ -1,0 +1,40 @@
+<robot name="marker_arrow">
+
+	<material name="color">
+		<color rgba="0 0 1 1"/>
+	</material>
+
+	<link name="world"/>
+	
+	<link name="cylinder">
+		<visual>
+			<origin rpo="0 0 0" xyz="0 0 0.4"/>
+			<geometry>
+				<cylinder length="0.8" radius="0.025"/>
+			</geometry>
+			<material name="color"/>
+		</visual>
+	</link>
+	
+	<link name="sphere">
+		<visual>
+			<geometry>
+				<sphere radius="0.05"/>
+			</geometry>
+			<material name="color"/>
+		</visual>
+	</link>
+	
+	<joint name="joint0" type="fixed">
+		<origin rpy="0 1.57 0" xyz="0 0 0"/>
+		<parent link="world" />
+		<child link="cylinder" />
+	</joint>
+	
+	<joint name="joint1" type="fixed">
+		<origin rpy="0 0 0" xyz="0 0 0.8"/>
+		<parent link="cylinder" />
+		<child link="sphere" />
+	</joint>
+	
+</robot>

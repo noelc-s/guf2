@@ -5,7 +5,7 @@ import numpy as np
 
 flyStartPos = [0,0,4]
 flyStartOrn = p.getQuaternionFromEuler([0,0,0])
-fly = flysim.Fly(flyStartPos, flyStartOrn, 'yan.csv', apply_forces=False)
+fly = flysim.Fly(flyStartPos, flyStartOrn, 'data/yan.csv', apply_forces=False)
 for i in range(200):
 	fly.step_simulation()
 

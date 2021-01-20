@@ -1,2 +1,4 @@
 /presentation*
+__pycache__/*
+../.idea/*
 

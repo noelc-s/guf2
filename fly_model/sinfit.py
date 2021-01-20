@@ -3,8 +3,8 @@ import scipy.optimize as spo
 import pandas as pd
 import matplotlib.pyplot as plt
 
-lift = np.asarray(pd.read_csv('wing_lift.csv', header=None))
-drag = np.asarray(pd.read_csv('wing_drag.csv', header=None))
+lift = np.asarray(pd.read_csv('data/wing_lift.csv', header=None))
+drag = np.asarray(pd.read_csv('data/wing_drag.csv', header=None))
 
 # Define model and x-range
 f = lambda x, a, b, w, c: a*np.sin(x*w) + b*np.cos(x*w) + c

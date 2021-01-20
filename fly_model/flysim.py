@@ -43,15 +43,15 @@ class Fly(object):
         # Load fly model
         
         # flyId = p.loadSDF("fly.sdf")[0]
-        self.flyId = p.loadURDF("fly.urdf", startPos, startOrn)
+        self.flyId = p.loadURDF("Model/fly.urdf", startPos, startOrn)
 
         # Load markers
-        self.mkRedId1 = p.loadURDF("arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
-        self.mkGrnId1 = p.loadURDF("arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
-        self.mkBluId1 = p.loadURDF("arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
-        self.mkRedId2 = p.loadURDF("arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
-        self.mkGrnId2 = p.loadURDF("arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
-        self.mkBluId2 = p.loadURDF("arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0]))
+        self.mkRedId1 = p.loadURDF("Model/arrow_red.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
+        self.mkGrnId1 = p.loadURDF("Model/arrow_green.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
+        self.mkBluId1 = p.loadURDF("Model/arrow_blue.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
+        self.mkRedId2 = p.loadURDF("Model/arrow_red.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
+        self.mkGrnId2 = p.loadURDF("Model/arrow_green.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
+        self.mkBluId2 = p.loadURDF("Model/arrow_blue.urdf", [1, 0, 3], p.getQuaternionFromEuler([0, 0, 0]))
 
         # Generate link and joint index dictionaries
         num_joints = p.getNumJoints(self.flyId)
@@ -328,7 +328,7 @@ if __name__ == "__main__":
 
     flyStartPos = [0,0,4]
     flyStartOrn = p.getQuaternionFromEuler([0,0,0])
-    fly = Fly(flyStartPos, flyStartOrn, 'yan.csv', apply_forces=False)
+    fly = Fly(flyStartPos, flyStartOrn, 'data/yan.csv', apply_forces=True)
     for i in range(1000):
         fly.step_simulation()
 

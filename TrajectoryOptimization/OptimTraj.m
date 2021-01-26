@@ -33,7 +33,7 @@ problem.bounds.finalState.upp = [0; 1; 5; 0; 0; 0;0;0;0;0;0;0];
 problem.bounds.state.low = -inf*ones(12,1);
 problem.bounds.state.upp = inf*ones(12,1);
 
-problem.bounds.control.low = -[maxForce; maxForce; minForce];
+problem.bounds.control.low = [-maxForce; -maxForce; minForce];
 problem.bounds.control.upp = [maxForce; maxForce; maxForce];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%

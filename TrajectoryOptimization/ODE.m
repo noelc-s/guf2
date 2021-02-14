@@ -19,12 +19,18 @@ R = Rz(psi)*Ry(phi)*Rx(theta);
 
 R_eul = [1 sin(phi)*tan(theta) cos(phi)*tan(theta); 0 cos(phi) -sin(phi); 0 sin(phi)*sec(theta) cos(phi)*sec(theta)];
 
+eps = 0.1;
+wingbeat = 2;
+% g_t = abs(sin(2*pi*wingbeat*t(i)))+eps;
+g_t = 1;
+
 dx(1,i) = x(7,i);
 dx(2,i) = x(8,i);
 dx(3,i) = x(9,i);
 dx(4:6,i) = R_eul*x(10:12,i);
-dx(7:9,i) = [0; 0; -g] + R*[0; 0; u(3,i)];
-dx(10:12,i) = [u(1,i); u(2,i); 0] - cross(x(4:6,i),x(4:6,i));
+% dx(7:9,i) = [0; 0; -g] + R*[g_t*u(1,i); g_t*(u(2,i)+u(3,i)/2); u(3,i)];
+dx(7:9,i) = [0; 0; -g] + R*[g_t*u(1,i); g_t*(u(2,i)); u(3,i)];
+dx(10:12,i) = [g_t*u(4,i); g_t*u(5,i); g_t*u(6,i)] - cross(x(4:6,i),x(4:6,i));
 
 end
 

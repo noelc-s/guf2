@@ -6,7 +6,7 @@ clc; clear;
 addpath /files/git/OptimTraj
 
 minForce = 10;
-maxForce = 100;  %Maximum actuator forces
+maxForce = 10000;  %Maximum actuator forces
 duration = 1;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -27,14 +27,14 @@ problem.bounds.finalTime.upp = duration;
 
 problem.bounds.initialState.low = [0; 0; 5; 0; 0; 0;0;0;0;0;0;0];
 problem.bounds.initialState.upp = [0; 0; 5; 0; 0; 0;0;0;0;0;0;0];
-problem.bounds.finalState.low = [0; 1; 5; 0; 0; 0;0;0;0;0;0;0];
-problem.bounds.finalState.upp = [0; 1; 5; 0; 0; 0;0;0;0;0;0;0];
+problem.bounds.finalState.low = [1; 0; 5; 0; 0; 0;0;0;0;0;0;0];
+problem.bounds.finalState.upp = [1; 0; 5; 0; 0; 0;0;0;0;0;0;0];
 
 problem.bounds.state.low = -inf*ones(12,1);
 problem.bounds.state.upp = inf*ones(12,1);
 
-problem.bounds.control.low = [-maxForce; -maxForce; minForce];
-problem.bounds.control.upp = [maxForce; maxForce; maxForce];
+problem.bounds.control.low = [-maxForce; -maxForce; minForce; -maxForce; -maxForce; -maxForce];
+problem.bounds.control.upp = [maxForce; maxForce; maxForce; maxForce; maxForce; maxForce];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                    Initial guess at trajectory                          %
@@ -42,7 +42,7 @@ problem.bounds.control.upp = [maxForce; maxForce; maxForce];
 
 problem.guess.time = [0,duration];
 problem.guess.state = [problem.bounds.initialState.low, problem.bounds.finalState.low];
-problem.guess.control = [0,0;0,0;0,0];
+problem.guess.control = [0,0;0,0;0,0;0,0;0,0;0,0];
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%

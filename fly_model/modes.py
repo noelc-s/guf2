@@ -107,8 +107,8 @@ def calc_kinematics(a, X, b, cmd):
 	# cmd contains the mode strengths (Fx, Fy, Fz, Mx, My, Mz)
 	# result contains the kinematics (etaL, phiL, thetaL, etaR, phiR, thetaR)
 
-	# modes = ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
-	modes = ["Fz"]
+	modes = ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
+	# modes = ["Fz"]
 	kinematics = np.empty((100,0))
 
 	for wing in ["L", "R"]:

@@ -40,6 +40,22 @@ def read_modes():
 			b[angle][wing] = {
 
 				# Forces
+				# "FxN": -npread('legendre/forces/b_FxF_{}.csv'.format(angle)),
+				# "FxP": npread('legendre/forces/b_FxF_{}.csv'.format(angle)),
+				# "FyN": -npread('legendre/forces/b_FyL_{}{}.csv'.format(angle, wing)),
+				# "FyP": npread('legendre/forces/b_FyL_{}{}.csv'.format(angle, wing)),
+				# "FzN": -npread('legendre/forces/b_FzU_{}.csv'.format(angle)),
+				# "FzP": npread('legendre/forces/b_FzU_{}.csv'.format(angle)),
+				#
+				# # Torques
+				# "MxN": -npread('legendre/torques/b_MxR_{}{}.csv'.format(angle, wing)),
+				# "MxP": npread('legendre/torques/b_MxR_{}{}.csv'.format(angle, wing)),
+				# "MyN": -npread('legendre/torques/b_MyD_{}.csv'.format(angle)),
+				# "MyP": npread('legendre/torques/b_MyD_{}.csv'.format(angle)),
+				# "MzN": -npread('legendre/torques/b_MzL_{}{}.csv'.format(angle, wing)),
+				# "MzP": npread('legendre/torques/b_MzL_{}{}.csv'.format(angle, wing))
+
+				# Forces
 				"FxN": npread('legendre/forces/b_FxB_{}.csv'.format(angle)),
 				"FxP": npread('legendre/forces/b_FxF_{}.csv'.format(angle)),
 				"FyN": npread('legendre/forces/b_FyR_{}{}.csv'.format(angle, wing)),
@@ -108,7 +124,6 @@ def calc_kinematics(a, X, b, cmd):
 	# result contains the kinematics (etaL, phiL, thetaL, etaR, phiR, thetaR)
 
 	modes = ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
-	# modes = ["Fz"]
 	kinematics = np.empty((100,0))
 
 	for wing in ["L", "R"]:

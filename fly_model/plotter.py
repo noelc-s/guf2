@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
 def npread(file, sep=',', header=None):
     df = pd.read_csv(file, sep=sep, header=header)
@@ -31,12 +32,6 @@ fp = []
 
 
 mag = np.arange(-5,5)
-# stroke_avg = []
-# for f in fp[::-1]:
-#     stroke_avg.append(np.mean(f))
-# stroke_avg.append(np.mean(f0))
-#
-# plt.plot(mag,stroke_avg)
 directions = ['fx','fy','fz','mx','my','mz']
 
 for file in range(0,6):
@@ -61,3 +56,24 @@ plt.legend(directions)
 # plt.gca().spines["top"].set_visible(False)
 # plt.plot(wb,np.transpose(fp))
 plt.show()
+
+
+#### Cross-directions
+# mag = np.arange(-5,5)
+# X, Y = np.meshgrid(mag,mag)
+# directions = ['fx','fy','fz','mx','my','mz']
+# direction1 = 0
+# direction2 = 2
+# fig = plt.figure()
+# for direction in range(0,6):
+#     stroke_avg = np.empty((10,10))
+#     for j1 in range(-5,5):
+#         for j2 in range(-5,5):
+#             f_j = npread('ForceCharacterization/'+directions[direction1]+'_'+directions[direction2]+'_'+str(j1)+'_'+str(j2)+'.csv')[:,direction]
+#             stroke_avg[j1+5,j2+5] = np.mean(f_j[100:])
+#     ax = fig.add_subplot(2, 3, direction+1, projection='3d')
+#     ax.set_title(directions[direction])
+#     ax.plot_surface(X,Y,stroke_avg)
+#     ax.set_xlabel(directions[direction2])
+#     ax.set_ylabel(directions[direction1])
+# plt.show()

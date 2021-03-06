@@ -201,17 +201,17 @@ class Fly(object):
 
         # TODO: This is a force offset hack
         if self.i > 100:
-        #     p.applyExternalForce(
-        #         self.flyId,
-        #         -1,
-        #         np.array((-1.6,0,-2.8)),
-        #         np.array((0,0,0)),
-        #         p.LINK_FRAME
-        #         )
+            p.applyExternalForce(
+                self.flyId,
+                -1,
+                np.array((-1,0,-1.5)),
+                np.array((0,0,0)),
+                p.LINK_FRAME
+                )
             p.applyExternalTorque(
                 self.flyId,
                 -1,
-                np.array((0,0.7,0)),
+                np.array((0,0.765,0)),
                 p.LINK_FRAME
             )
 
@@ -312,8 +312,8 @@ if __name__ == "__main__":
 
     gains = np.array([10,50,1,5])*0.000001
     # gains = np.array([0,0,0,0])*0.000001
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=False, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
 
     ##### Nomral integration
     for i in range(int(tspan/dt)):

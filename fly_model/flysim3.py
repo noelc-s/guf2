@@ -95,7 +95,7 @@ class Fly(object):
 
         p.resetBaseVelocity(self.flyId, startLinVel, startAngVel)
 
-        p.resetBasePositionAndOrientation(self.flyId, (0,0,4),vec2q((0,0,0)))
+        p.resetBasePositionAndOrientation(self.flyId, startPos,startOrn)
 
     def step_simulation(self):
         net_force = np.zeros(3)
@@ -103,8 +103,8 @@ class Fly(object):
 
         target = self.calc_legendre(self.i%self.wk_len) #from legendre model
 
-        if self.apply_forces:
-            target = self.linramp(self.sim_time, target, 1.0)
+        # if self.apply_forces:
+        #     target = self.linramp(self.sim_time, target, 1.0)
 
         flip = np.sign(target[0] - self.target_last[0])
 
@@ -201,17 +201,17 @@ class Fly(object):
 
         # TODO: This is a force offset hack
         if self.i > 100:
-            p.applyExternalForce(
-                self.flyId,
-                -1,
-                np.array((-1.6,0,-2.8)),
-                np.array((0,0,0)),
-                p.LINK_FRAME
-                )
+        #     p.applyExternalForce(
+        #         self.flyId,
+        #         -1,
+        #         np.array((-1.6,0,-2.8)),
+        #         np.array((0,0,0)),
+        #         p.LINK_FRAME
+        #         )
             p.applyExternalTorque(
                 self.flyId,
                 -1,
-                np.array((0,0.39,0)),
+                np.array((0,0.7,0)),
                 p.LINK_FRAME
             )
 
@@ -245,7 +245,7 @@ class Fly(object):
 
         cD = 1.464 * np.sin(0.0342*aoa - 1.667) + 2.008
         drag = -cD * vel * np.linalg.norm(vel) * 0.5
-        return drag
+        return drag/100
 
     @staticmethod
     def calc_lift(aoa, vel, span, flip=1):
@@ -253,7 +253,7 @@ class Fly(object):
 
         cL = 1.597 * np.sin(0.0407*aoa - 0.369) + 0.317
         lift = cL * np.cross(vel, flip*span) * np.linalg.norm(vel) * 0.5
-        return(lift)
+        return lift/100
 
     @staticmethod
     def linramp(t,x,tc):
@@ -307,13 +307,13 @@ if __name__ == "__main__":
     # flyStartAngVel = [0,-0.8,0]
     flyStartAngVel = [0,0,0]
 
-    dt = 1./120. # seconds
-    tspan = 20/1.2
+    dt = 1./1000. # seconds
+    tspan = 200/10
 
-    gains = np.array([10,5,.02,.02])*0.000001
+    gains = np.array([10,50,1,5])*0.000001
     # gains = np.array([0,0,0,0])*0.000001
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=False, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
 
     ##### Nomral integration
     for i in range(int(tspan/dt)):
@@ -325,8 +325,8 @@ if __name__ == "__main__":
     stroke_avg = []
     for i in range(0,6):
         stroke_avg.append(np.mean(f[100:,i]))
-    plt.bar(range(0,6),stroke_avg)
-    # plt.plot(wb[100:],f[100:,i])
+    # plt.bar(range(0,6),stroke_avg)
+    plt.plot(wb[100:],f[100:,2])
 
     ### Automated construction of Fx,...,Mz
     # directions = ['fx','fy','fz','mx','my','mz']

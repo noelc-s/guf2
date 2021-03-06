@@ -36,8 +36,8 @@ class Controller(object):
         n2 = dq - self.dq_des
 
         u = np.concatenate((- self.Gains[0]*n1[0:3], - self.Gains[1]*n1[3:6])) + np.concatenate((-self.Gains[2]*n2[0:3], - self.Gains[3]*n2[3:6]))
-        # u = np.array([u[0],-u[1],-u[2],u[3],-u[4],0])
-        u = np.array([0,0,0,0,u[4],0])
+        u = np.array([u[0],-u[1],-u[2],u[3],-u[4],0])
+        # u = np.array([0,0,0,0,-u[4],0])
         return u
 
     def FL(self, Fly, q, dq):

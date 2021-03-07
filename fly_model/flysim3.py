@@ -93,9 +93,8 @@ class Fly(object):
         for i, joint in enumerate(self.motor_list):
             p.resetJointState(self.flyId, joint, self.calc_legendre(0)[i])
 
-        p.resetBaseVelocity(self.flyId, startLinVel, startAngVel)
-
         p.resetBasePositionAndOrientation(self.flyId, startPos,startOrn)
+        p.resetBaseVelocity(self.flyId, startLinVel, startAngVel)
 
     def step_simulation(self):
         net_force = np.zeros(3)
@@ -304,16 +303,17 @@ if __name__ == "__main__":
     flyStartPos = [0,0,4]
     flyStartOrn = p.getQuaternionFromEuler([0,0,0])
     flyStartLinVel = [0,0,0]
-    # flyStartAngVel = [0,-0.8,0]
     flyStartAngVel = [0,0,0]
 
     dt = 1./1000. # seconds
     tspan = 200/10
 
-    gains = np.array([10,50,1,5])*0.000001
-    # gains = np.array([0,0,0,0])*0.000001
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
+    # gains = np.array([10,50,1,20])*0.000001
+    KP = np.array([10,10,30,50,50,50])*0.000001
+    KD = np.array([1,1,10,20,20,20])*0.000001
+    gains = np.concatenate((KP,KD))
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
 
     ##### Nomral integration
     for i in range(int(tspan/dt)):

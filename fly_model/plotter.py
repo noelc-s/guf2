@@ -30,14 +30,14 @@ wb = np.arange(f0.shape[0])/100
 fp = []
 
 
-
-mag = np.arange(-5,5)
+## Stroke averages for all the individual modes
+mag = np.arange(-10,10)
 directions = ['fx','fy','fz','mx','my','mz']
 
 for file in range(0,6):
     for direction in range(0,6):
         stroke_avg = []
-        for j in range(-5,5):
+        for j in range(-10,10):
             f_j = npread('ForceCharacterization/'+directions[file]+'_{}.csv'.format(j))[:,direction]
             stroke_avg.append(np.mean(f_j[100:]))
             # fp.append(f_j)

@@ -164,8 +164,8 @@ class Fly(object):
         self.sim_time += self.dt
         time.sleep(self.dt)
 
-        net_force += (-1,0,-1.5)
-        net_torque += (0,0.765,0)
+        net_force += (-1,0,-1.8)
+        net_torque += (0,0.786,0)
 
         # TODO: This is a force offset hack
         if self.i > 100:
@@ -272,66 +272,72 @@ if __name__ == "__main__":
     flyStartPos = [0,0,4]
     flyStartOrn = p.getQuaternionFromEuler([0,0,0])
     flyStartLinVel = [0,0,0]
-    flyStartAngVel = [0,0,0]
+    flyStartAngVel = [0,-4,0]
 
     dt = 1./1000. # seconds
-    tspan = 200/10
 
     # gains = np.array([10,50,1,20])*0.000001
     KP = np.array([10,10,30,50,50,50])*0.000001
     KD = np.array([1,1,10,20,20,20])*0.000001
     gains = np.concatenate((KP,KD))
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=False, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='Constant',gains = gains)
 
     ##### Nomral integration
-    # for i in range(int(tspan/dt)):
-    #     fly.get_control()
-    #     fly.step_simulation()
-    # #
-    # wb = np.arange(fly.forces.shape[0])/100
-    # f = np.concatenate((fly.forces, fly.torques), axis = 1)
-    # stroke_avg = []
-    # for i in range(0,6):
-    #     stroke_avg.append(np.mean(f[100:,i]))
-    # plt.bar(range(0,6),stroke_avg)
-    # plt.plot(wb[100:],f[100:,2])
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
+    # cmd = [0,0,0,0,0,0]
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    tspan = 2000/10
+    for i in range(int(tspan/dt)):
+        fly.get_control()
+        fly.step_simulation()
+    #
+    wb = np.arange(fly.forces.shape[0])/100
+    f = np.concatenate((fly.forces, fly.torques), axis = 1)
+    stroke_avg = []
+    for i in range(0,6):
+        stroke_avg.append(np.mean(f[100:,i]))
+    plt.bar(range(0,6),stroke_avg)
+    plt.plot(wb[100:],f[100:,2])
 
     ### Automated construction of Fx,...,Mz
-    directions = ['fx','fy','fz','mx','my','mz']
-    for direction in range(0,6):
-        for j in range(-5,5):
-            cmd = [0,0,0,0,0,0]
-            cmd[direction] = 0.00001*j
-            fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
-
-            for i in range(int(tspan/dt)):
-                fly.get_control()
-                fly.step_simulation()
-
-            f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-            npwrite(f1,'ForceCharacterization/'+directions[direction]+'_'+str(j)+'.csv')
+    # tspan = 2/10
+    # directions = ['fx','fy','fz','mx','my','mz']
+    # for direction in range(0,6):
+    #     for j in range(-10,10):
+    #         cmd = [0,0,0,0,0,0]
+    #         cmd[direction] = 0.00001*j
+    #         fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
+    #
+    #         for i in range(int(tspan/dt)):
+    #             fly.get_control()
+    #             fly.step_simulation()
+    #
+    #         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
+    #         npwrite(f1,'ForceCharacterization/'+directions[direction]+'_'+str(j)+'.csv')
 
     ## Crosstalk between modes
+    # tspan = 2/10
     # directions = ['fx','fy','fz','mx','my','mz']
-    # direction1 = 0
-    # name1 = directions[direction1]
-    # direction2 = 2
-    # name2 = directions[direction2]
-    # for direction in range(0,6):
-    #     for j1 in range(-5,5):
-    #         for j2 in range(-5,5):
-    #             cmd = [0,0,0,0,0,0]
-    #             cmd[direction1] = 0.00001*j1
-    #             cmd[direction2] = 0.00001*j2
-    #             fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
+    # for direction1 in range(0,6):
+    #     for direction2 in range(0,6):
+    #         if direction1 != direction2:
+    #             # direction1 = 0
+    #             name1 = directions[direction1]
+    #             # direction2 = 2
+    #             name2 = directions[direction2]
+    #             for direction in range(0,6):
+    #                 for j1 in range(-5,5):
+    #                     for j2 in range(-5,5):
+    #                         cmd = [0,0,0,0,0,0]
+    #                         cmd[direction1] = 0.00001*j1
+    #                         cmd[direction2] = 0.00001*j2
+    #                         fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
     #
-    #             for i in range(int(tspan/dt)):
-    #                 fly.get_control()
-    #                 fly.step_simulation()
+    #                         for i in range(int(tspan/dt)):
+    #                             fly.get_control()
+    #                             fly.step_simulation()
     #
-    #             f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-    #             npwrite(f1,'ForceCharacterization/'+name1+'_'+name2+'_'+str(j1)+'_'+str(j2)+'.csv')
+    #                         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
+    #                         npwrite(f1,'ForceCharacterization/'+name1+'_'+name2+'_'+str(j1)+'_'+str(j2)+'.csv')
 
     # Plot forces and torques
     # plt.subplot(211)

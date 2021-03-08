@@ -9,7 +9,9 @@ from controller import *
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import modes
+import _thread
 # import qarray
+import itertools
 
 class Fly(object):
 
@@ -18,6 +20,7 @@ class Fly(object):
         self.apply_forces = apply_forces
 
         # Initialize physics and scene
+        self.gui = gui
         if gui:
             self.physicsClient = p.connect(p.GUI) # with GUI
         else:
@@ -40,17 +43,18 @@ class Fly(object):
 
         self.flyId = p.loadURDF("Model/fly.urdf", startPos, startOrn)
 
-        self.mkRedId = []
-        self.mkGrnId = []
-        self.mkBluId = []
+        if self.gui:
+            self.mkRedId = []
+            self.mkGrnId = []
+            self.mkBluId = []
 
-        # Load markers (for forces)
-        self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-        self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-        self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-        self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-        self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-        self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            # Load markers (for forces)
+            self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
 
         # Generate link and joint index dictionaries
         num_joints = p.getNumJoints(self.flyId)
@@ -107,7 +111,6 @@ class Fly(object):
         net_torque = np.zeros(3)
 
         target = self.calc_legendre(self.i%self.wk_len) #from legendre model
-
         # If ramping is desired -- causes strange behavior
         # if self.apply_forces:
         #     target = self.linramp(self.sim_time, target, 1.0)
@@ -130,8 +133,9 @@ class Fly(object):
             wlVel = p.getLinkState(self.flyId, self.link_dict[wing], computeLinkVelocity=1)[6]
             wing_pos, vel_orn = worldPlusVector(self.flyId, self.link_dict[wing], [0,0,1])
 
-            p.resetBasePositionAndOrientation(self.mkBluId[i], wing_pos, vel_orn)
-            p.resetBasePositionAndOrientation(self.mkRedId[i], wing_pos, vec2q(wlVel))
+            if self.gui:
+                p.resetBasePositionAndOrientation(self.mkBluId[i], wing_pos, vel_orn)
+                p.resetBasePositionAndOrientation(self.mkRedId[i], wing_pos, vec2q(wlVel))
 
             # Calculate angle of attack
             aoa = qAngle(
@@ -158,7 +162,8 @@ class Fly(object):
             lever = np.array(p.getLinkState(self.flyId, self.link_dict[wing])[0]) - np.array(p.getBasePositionAndOrientation(self.flyId)[0])
             net_torque += np.cross(lever, lift+drag)
 
-            p.resetBasePositionAndOrientation(self.mkGrnId[i], wing_pos, vec2q(lift+drag))
+            if self.gui:
+                p.resetBasePositionAndOrientation(self.mkGrnId[i], wing_pos, vec2q(lift+drag))
 
         p.stepSimulation()
         self.sim_time += self.dt
@@ -168,6 +173,20 @@ class Fly(object):
         net_torque += (0,0.786,0)
 
         # TODO: This is a force offset hack
+        # if self.apply_forces & self.i > 100:
+        #     p.applyExternalForce(
+        #         self.flyId,
+        #         -1,
+        #         np.array((-1,0,-1.8)),
+        #         np.array((0,0,0)),
+        #         p.LINK_FRAME
+        #         )
+        #     p.applyExternalTorque(
+        #         self.flyId,
+        #         -1,
+        #         np.array((0,0.786,0)),
+        #         p.LINK_FRAME
+        # )
         if self.i > 100:
             p.applyExternalForce(
                 self.flyId,
@@ -175,7 +194,7 @@ class Fly(object):
                 np.array((-1,0,-1.8)),
                 np.array((0,0,0)),
                 p.LINK_FRAME
-                )
+            )
             p.applyExternalTorque(
                 self.flyId,
                 -1,
@@ -267,12 +286,52 @@ def npwrite(arr, file):
     df = pd.DataFrame(arr)
     df.to_csv(file, header=False, index=False)
 
+def map2cmd(num):
+    cmd = [0,0,0,0,0,0]
+    ind = [0,1,-1,2,-2,3,-3,4,-4,5]
+    num_str = "%06d" % num
+    for i in range(6):
+        cmd[i] = (ind[int(num_str[i])])*0.00001
+    return cmd
+
+def SimulateData(threadName, vals):
+    tspan = 1.5/10
+    cmd = [0,0,0,0,0,0]
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=False, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    directions = ['fx','fy','fz','mx','my','mz']
+    val = 0
+    t = time.time()
+    avg_f = []
+    cmd_list = []
+    for val in range(vals[0],vals[1]):
+        cmd = map2cmd(val) # base 10 (-5 to 4)
+        fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
+
+        for i in range(int(tspan/dt)):
+            fly.get_control()
+            fly.step_simulation()
+
+        f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
+        avg_f.append(np.mean(f1[50:150,:],0))
+        cmd_list.append(cmd)
+        # val += 1
+        if val % 100 == 99:
+            elapsed = time.time() - t
+            print("%s: %d; %f" % (threadName, val, elapsed))
+            npwrite(np.concatenate((cmd_list,avg_f),1),'ForceCharacterization2/'+"%06d" % val+'.csv')
+            avg_f = []
+            cmd_list = []
+        # npwrite(np.mean(f1[50:150,:],0),'ForceCharacterization2/'+"%06d" % val+'.csv')
+        # val += 1
+        # elapsed = time.time() - t
+        # print("%s: %d; %f" % (threadName, val, elapsed))
+
 if __name__ == "__main__":
 
     flyStartPos = [0,0,4]
     flyStartOrn = p.getQuaternionFromEuler([0,0,0])
     flyStartLinVel = [0,0,0]
-    flyStartAngVel = [0,-4,0]
+    flyStartAngVel = [0,0,0]
 
     dt = 1./1000. # seconds
 
@@ -282,10 +341,12 @@ if __name__ == "__main__":
     gains = np.concatenate((KP,KD))
 
     ##### Nomral integration
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
-    # cmd = [0,0,0,0,0,0]
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
-    tspan = 2000/10
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=[0.0,0.0,0.0,0.0,0.0,0.0], controller='PD',gains = gains)
+    cmd = [0,0,0,0,0,0]
+    # cmd = np.array([ 1.99981371e-05, -2.85941541e-05,  8.95345261e-06,  1.13530774e-05,
+    #         -5.34570285e-06, -6.75361643e-05])*0.1
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    tspan = 200/10
     for i in range(int(tspan/dt)):
         fly.get_control()
         fly.step_simulation()
@@ -294,12 +355,14 @@ if __name__ == "__main__":
     f = np.concatenate((fly.forces, fly.torques), axis = 1)
     stroke_avg = []
     for i in range(0,6):
-        stroke_avg.append(np.mean(f[100:,i]))
-    plt.bar(range(0,6),stroke_avg)
-    plt.plot(wb[100:],f[100:,2])
+        stroke_avg.append(np.mean(f[50:150,i]))
+    # plt.bar(range(0,6),stroke_avg)
+    plt.plot(wb%1,f)
 
     ### Automated construction of Fx,...,Mz
     # tspan = 2/10
+    # cmd = [0,0,0,0,0,0]
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
     # directions = ['fx','fy','fz','mx','my','mz']
     # for direction in range(0,6):
     #     for j in range(-10,10):
@@ -312,32 +375,26 @@ if __name__ == "__main__":
     #             fly.step_simulation()
     #
     #         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-    #         npwrite(f1,'ForceCharacterization/'+directions[direction]+'_'+str(j)+'.csv')
+            # npwrite(f1,'ForceCharacterization/'+directions[direction]+'_'+str(j)+'.csv')
+
+    # perm = set(itertools.permutations([1,0,0,0,0,0],6))
+    # perm = perm.union(set(itertools.permutations([1,1,0,0,0,0],6)))
+    # perm = perm.union(set(itertools.permutations([1,1,1,0,0,0],6)))
+    # perm = perm.union(set(itertools.permutations([1,1,1,1,0,0],6)))
+    # perm = perm.union(set(itertools.permutations([1,1,1,1,1,0],6)))
+    # perm = perm.union(set(itertools.permutations([1,1,1,1,1,1],6)))
 
     ## Crosstalk between modes
-    # tspan = 2/10
-    # directions = ['fx','fy','fz','mx','my','mz']
-    # for direction1 in range(0,6):
-    #     for direction2 in range(0,6):
-    #         if direction1 != direction2:
-    #             # direction1 = 0
-    #             name1 = directions[direction1]
-    #             # direction2 = 2
-    #             name2 = directions[direction2]
-    #             for direction in range(0,6):
-    #                 for j1 in range(-5,5):
-    #                     for j2 in range(-5,5):
-    #                         cmd = [0,0,0,0,0,0]
-    #                         cmd[direction1] = 0.00001*j1
-    #                         cmd[direction2] = 0.00001*j2
-    #                         fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
-    #
-    #                         for i in range(int(tspan/dt)):
-    #                             fly.get_control()
-    #                             fly.step_simulation()
-    #
-    #                         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-    #                         npwrite(f1,'ForceCharacterization/'+name1+'_'+name2+'_'+str(j1)+'_'+str(j2)+'.csv')
+    # SimulateData("Thread 1",(0, 1000000))
+    # _thread.start_new_thread(SimulateData,("Thread 1",(0, 100000)))
+    # _thread.start_new_thread(SimulateData,("Thread 2",(100000, 200000)))
+    # _thread.start_new_thread(SimulateData,("Thread 3",(200000, 300000)))
+    # _thread.start_new_thread(SimulateData,("Thread 1",(0, 10)))
+    # _thread.start_new_thread(SimulateData,("Thread 2",(10, 20)))
+    # _thread.start_new_thread(SimulateData,("Thread 3",(20, 30)))
+    # _thread.start_new_thread(SimulateData,("Thread 4",(30, 40)))
+    # _thread.start_new_thread(SimulateData,("Thread 5",(40, 50)))
+    # _thread.start_new_thread(SimulateData,("Thread 6",(50, 60)))
 
     # Plot forces and torques
     # plt.subplot(211)

@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
+import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
 import torch
 import torch.nn as nn
+
 
 def npread(file, sep=',', header=None):
     df = pd.read_csv(file, sep=sep, header=header)
@@ -60,9 +63,9 @@ def parseData():
 def readData():
     X = np.load('CMD.npy')
     Y = np.load('GenFM.npy')
-    X[:,2] -= 3.62
-    return torch.from_numpy(X).float(),torch.from_numpy(Y).float()
-
+    # X[:,2] -= 3.62
+    # return torch.from_numpy(X).float(),torch.from_numpy(Y).float()
+    return X, Y
 
 class Neural_Network(nn.Module):
     def __init__(self, ):
@@ -70,9 +73,9 @@ class Neural_Network(nn.Module):
         # parameters
         self.inputSize = 6
         self.outputSize = 6
-        self.hiddenSize1 = 30
-        self.hiddenSize2 = 30
-        self.hiddenSize3 = 30
+        self.hiddenSize1 = 10
+        self.hiddenSize2 = 10
+        self.hiddenSize3 = 10
 
         # weights
         self.W1 = torch.randn(self.inputSize, self.hiddenSize1)
@@ -107,10 +110,10 @@ class Neural_Network(nn.Module):
         self.z4_delta = self.z4_error * self.sigmoidPrime(self.z4)
         self.z2_error = torch.matmul(self.z4_delta, torch.t(self.W2))
         self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
-        self.W1 += torch.matmul(torch.t(X), self.z2_delta)
-        self.W2 += torch.matmul(torch.t(self.z2), self.z4_delta)
-        self.W3 += torch.matmul(torch.t(self.z4), self.z6_delta)
-        self.W4 += torch.matmul(torch.t(self.z6), self.o_delta)
+        self.W1 += 0.1*torch.matmul(torch.t(X), self.z2_delta)
+        self.W2 += 0.1*torch.matmul(torch.t(self.z2), self.z4_delta)
+        self.W3 += 0.1*torch.matmul(torch.t(self.z4), self.z6_delta)
+        self.W4 += 0.1*torch.matmul(torch.t(self.z6), self.o_delta)
 
     def train(self, X, y):
         # forward + backward pass for training
@@ -132,21 +135,30 @@ class Neural_Network(nn.Module):
 if __name__ == "__main__":
     # parseData()
     X, Y = readData()
-    X_max, _ = torch.max(X, 0)
-    X = torch.div(X, X_max)
-    # Y_max, _ = torch.max(Y, 0)
-    # Y = torch.div(Y, Y_max)
 
+    rng_state = np.random.get_state()
+    np.random.shuffle(X)
+    np.random.set_state(rng_state)
+    np.random.shuffle(Y)
+
+    train_perc = 0.9
+    train = range(0,math.floor(X.shape[0]*train_perc))
+    test = range(math.floor(X.shape[0]*train_perc),X.shape[0])
+    x_train = torch.from_numpy(X[train,:]*1e5).float()
+    x_test = torch.from_numpy(X[test,:]*1e5).float()
+    y_train = torch.from_numpy(Y[train,:]).float()
+    y_test = torch.from_numpy(Y[test,:]).float()
 
     NN = Neural_Network()
     Loss = []
-    iter = 10000
+    iter = 2000
     for i in range(iter):  # trains the NN 1,000 times
-        loss = torch.mean((Y - NN(X))**2).detach().item()
-        # print ("#" + str(i) + " Loss: " + str(loss))  # mean sum squared loss
+        loss = torch.mean((x_train - NN(y_train))**2).detach().item()
+        print ("#" + str(i) + " Loss: " + str(loss))  # mean sum squared loss
         Loss.append(loss)
-        NN.train(Y, X)
+        NN.train(y_train, x_train)
     NN.saveWeights(NN)
     NN.predict()
     plt.plot(range(iter),Loss)
     plt.show()
+

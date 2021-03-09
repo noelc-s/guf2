@@ -3,7 +3,7 @@ import numpy as np
 import copy
 
 class Controller(object):
-    def __init__(self,controlType,Gains,ss):
+    def __init__(self,controlType,Gains,u_ff):
         self.control = {
             'PD': self.PD,
             'FL': self.FL,
@@ -13,10 +13,10 @@ class Controller(object):
         self.controlType = controlType
         self.u = 0
         self.Gains = Gains
-        self.ss = ss
+        self.u_ff = u_ff
 
-        self.q_des = np.array([0.,0.,4.,0.,0,0.])
-        self.dq_des = np.array([0.,0.,0.,0.,0,0.])
+        self.q_des = np.array([0.,0.,4.,0.,0.,0.])
+        self.dq_des = np.array([0.,0.,0.,0.,0.,0.])
 
     def getControl(self, Fly, q, dq):
 
@@ -36,7 +36,7 @@ class Controller(object):
         n2 = dq - self.dq_des
 
         u = - np.multiply(self.Gains[0:6],n1) - np.multiply(self.Gains[6:12],n2)
-        u = np.array([u[0],u[1],u[2],u[3],u[4],0])
+        u = np.array([u[0],u[1],u[2],u[3],u[4],0]) + self.u_ff
         # u = np.array([0,0,0,u[3],0,0])
         # u = np.array([0,0,0,u[3],0,0])
         return u

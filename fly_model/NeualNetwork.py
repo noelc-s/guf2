@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.matlib
 import pandas as pd
 import math
 import matplotlib.pyplot as plt
@@ -76,6 +77,7 @@ class Neural_Network(nn.Module):
         self.hiddenSize1 = 10
         self.hiddenSize2 = 10
         self.hiddenSize3 = 10
+        self.learning_rate = 0.005
 
         # weights
         self.W1 = torch.randn(self.inputSize, self.hiddenSize1)
@@ -95,11 +97,11 @@ class Neural_Network(nn.Module):
         return o
 
     def sigmoid(self, s):
-        return 1 / (1 + torch.exp(-s/100))
+        return 1 / (1 + torch.exp(-s))
 
     def sigmoidPrime(self, s):
         # derivative of sigmoid
-        return s/100 * (1 - s)
+        return s* (1 - s)
 
     def backward(self, X, y, o):
         self.o_error = y - o # error in output
@@ -110,10 +112,10 @@ class Neural_Network(nn.Module):
         self.z4_delta = self.z4_error * self.sigmoidPrime(self.z4)
         self.z2_error = torch.matmul(self.z4_delta, torch.t(self.W2))
         self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
-        self.W1 += 0.1*torch.matmul(torch.t(X), self.z2_delta)
-        self.W2 += 0.1*torch.matmul(torch.t(self.z2), self.z4_delta)
-        self.W3 += 0.1*torch.matmul(torch.t(self.z4), self.z6_delta)
-        self.W4 += 0.1*torch.matmul(torch.t(self.z6), self.o_delta)
+        self.W1 += self.learning_rate*torch.matmul(torch.t(X), self.z2_delta)
+        self.W2 += self.learning_rate*torch.matmul(torch.t(self.z2), self.z4_delta)
+        self.W3 += self.learning_rate*torch.matmul(torch.t(self.z4), self.z6_delta)
+        self.W4 += self.learning_rate*torch.matmul(torch.t(self.z6), self.o_delta)
 
     def train(self, X, y):
         # forward + backward pass for training
@@ -127,7 +129,7 @@ class Neural_Network(nn.Module):
         # torch.load("NN")
 
     def predict(self):
-        xPredicted = torch.tensor([0,0,1,0,0,0],dtype=torch.float)
+        xPredicted = torch.tensor([5,0,0,0,0,0],dtype=torch.float)
         print ("Predicted data based on trained weights: ")
         print ("Input: \n" + str(xPredicted))
         print ("Output: \n" + str(self.forward(xPredicted)))
@@ -135,6 +137,8 @@ class Neural_Network(nn.Module):
 if __name__ == "__main__":
     # parseData()
     X, Y = readData()
+
+    Y = Y - np.matlib.repmat(Y[5,:],X.shape[0],1)
 
     rng_state = np.random.get_state()
     np.random.shuffle(X)
@@ -151,7 +155,7 @@ if __name__ == "__main__":
 
     NN = Neural_Network()
     Loss = []
-    iter = 2000
+    iter = 3000
     for i in range(iter):  # trains the NN 1,000 times
         loss = torch.mean((x_train - NN(y_train))**2).detach().item()
         print ("#" + str(i) + " Loss: " + str(loss))  # mean sum squared loss

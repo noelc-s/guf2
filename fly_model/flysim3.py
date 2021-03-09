@@ -343,49 +343,52 @@ if __name__ == "__main__":
     # z mode: +- 10 fz (pure vertical)
     # x mode: +- 3 my, +- 0.25*my in fz mode - ish
     ##### Nomral integration
-    # cmd = np.array([0.0,0.0,0.5,0.0,2.0,0.0])*1e-5 ## Hand tuned
-    # cmd = np.array([3.7202e-06, 1.0643e-06, 1.4623e-06, 3.7512e-04, 9.6991e-01, 2.4633e-03])*1e-5 ## NN
+    # cmd = np.array([0.0,0.0,0.5,0.0,2.0,0.0])*2e-5 ## Hand tuned fx mode
+    # cmd = np.array([0.0,0.0,10.0,0.0,0.0,0.0])*1e-5 ## Hand tuned fz mode
+    # cmd = np.array([ 7.3457e-05, 0,-7.4860e-06, 0, 5.4652e-07,0]) ## NN fx
+    # cmd = np.array([-3.6913e-06,0,  2.5984e-05,  0,5.4652e-07,0]) ## NN fz
+    cmd = np.array([-3.6913e-06,0, -7.4860e-06, 0, 3.3121e-05,0]) ## NN my
     # cmd = np.array([0,0,0,0,0,0])*1e-5
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
     # cmd = np.array([0,0,0,0,0,0])*1e-5
     # cmd = np.array([1.59771730e-06, 0, 1.09018393e-05,
     #                 0, 1.57732922e-06, 0]) ## Least squares
     # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
-    # tspan = 200/10
-    # for i in range(int(tspan/dt)):
-    #     fly.get_control()
-    #     fly.step_simulation()
-    # #
-    # wb = np.arange(fly.forces.shape[0])/100
-    # f = np.concatenate((fly.forces, fly.torques), axis = 1)
-    # stroke_avg = []
-    # for i in range(0,6):
-    #     stroke_avg.append(np.mean(f[50:150,i]))
-    # # plt.bar(range(0,6),stroke_avg)
-    # plt.plot(wb%1,f)
+    tspan = 200/10
+    for i in range(int(tspan/dt)):
+        fly.get_control()
+        fly.step_simulation()
+    #
+    wb = np.arange(fly.forces.shape[0])/100
+    f = np.concatenate((fly.forces, fly.torques), axis = 1)
+    stroke_avg = []
+    for i in range(0,6):
+        stroke_avg.append(np.mean(f[50:150,i]))
+    # plt.bar(range(0,6),stroke_avg)
+    plt.plot(wb%1,f)
 
     ### Automated construction of Fx,...,Mz
-    tspan = 2/10
-    KP = np.array([0,0,0,50,50,50])*0.000001
-    KD = np.array([0,0,0,20,20,20])*0.000001
-    gains = np.concatenate((KP,KD))
-    cmd = [0,0,0,0,0,0]
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
-    directions = ['fx','fy','fz','mx','my','mz']
-    for direction in range(0,6):
-        for j in range(-10,10):
-            cmd = [0,0,0,0,0,0]
-            cmd[direction] = 0.00001*j
-            # fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
-            fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
-
-            for i in range(int(tspan/dt)):
-                fly.get_control()
-                fly.step_simulation()
-
-            f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-            npwrite(f1,'ForceCharCL/'+directions[direction]+'_'+str(j)+'.csv')
+    # tspan = 2/10
+    # KP = np.array([0,0,0,50,50,50])*0.000001
+    # KD = np.array([0,0,0,20,20,20])*0.000001
+    # gains = np.concatenate((KP,KD))
+    # cmd = [0,0,0,0,0,0]
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
+    # # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    # directions = ['fx','fy','fz','mx','my','mz']
+    # for direction in range(0,6):
+    #     for j in range(-10,10):
+    #         cmd = [0,0,0,0,0,0]
+    #         cmd[direction] = 0.00001*j
+    #         # fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=False, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    #         fly.initialize(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
+    #
+    #         for i in range(int(tspan/dt)):
+    #             fly.get_control()
+    #             fly.step_simulation()
+    #
+    #         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
+    #         npwrite(f1,'ForceCharCL/'+directions[direction]+'_'+str(j)+'.csv')
 
     # perm = set(itertools.permutations([1,0,0,0,0,0],6))
     # perm = perm.union(set(itertools.permutations([1,1,0,0,0,0],6)))
@@ -395,7 +398,7 @@ if __name__ == "__main__":
     # perm = perm.union(set(itertools.permutations([1,1,1,1,1,1],6)))
 
     ## Crosstalk between modes
-    # SimulateData("Thread 1",(72600, 1000000))
+    # SimulateData("Thread 1",(162100, 1000000))
     # _thread.start_new_thread(SimulateData,("Thread 1",(0, 100000)))
     # _thread.start_new_thread(SimulateData,("Thread 2",(100000, 200000)))
     # _thread.start_new_thread(SimulateData,("Thread 3",(200000, 300000)))

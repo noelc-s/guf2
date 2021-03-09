@@ -39,7 +39,7 @@ for file in range(0,6):
         stroke_avg = []
         cmd = []
         for j in mode_mag_range:
-            f_j = npread('ForceCharacterization/'+directions[file]+'_{}.csv'.format(j))[:,direction]
+            f_j = npread('ForceCharCL/'+directions[file]+'_{}.csv'.format(j))[:,direction]
             stroke_avg.append(np.mean(f_j[100:]))
             cmd_tmp = [0,0,0,0,0,0]
             cmd_tmp[file] = 0.00001*j

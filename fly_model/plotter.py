@@ -24,21 +24,21 @@ red = (0.9,0.2,0)
 
 sa = []
 
-f0 = npread('ForceCharacterization/fz_0.csv')
+f0 = npread('ForceCharCL/fz_0.csv')
 wb = np.arange(f0.shape[0])/100
 
 fp = []
 
 
 ## Stroke averages for all the individual modes
-mag = np.arange(-10,10)
+mag = np.arange(-2,3)
 directions = ['fx','fy','fz','mx','my','mz']
 
 for file in range(0,6):
     for direction in range(0,6):
         stroke_avg = []
-        for j in range(-10,10):
-            f_j = npread('ForceCharacterization/'+directions[file]+'_{}.csv'.format(j))[:,direction]
+        for j in range(-2,3):
+            f_j = npread('ForceCharCL/'+directions[file]+'_{}.csv'.format(j))[:,direction]
             stroke_avg.append(np.mean(f_j[100:]))
             # fp.append(f_j)
         ax=plt.subplot(2,3,direction+1)

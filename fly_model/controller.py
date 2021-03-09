@@ -48,7 +48,7 @@ class Controller(object):
         return [0,0,0,0,0,0]
 
     def Constant(self, Fly, q, dq):
-        return self.ss
+        return self.u_ff
     #
     #     R_eul = [1 sin(phi)*tan(theta) cos(phi)*tan(theta); 0 cos(phi) -sin(phi); 0 sin(phi)*sec(theta) cos(phi)*sec(theta)]
     #     Rz = @(t) [cos(t) sin(t) 0; -sin(t) cos(t) 0; 0 0 1]

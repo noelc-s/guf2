@@ -31,7 +31,7 @@ def parseData():
                     stroke_avg_tmp = []
                     cmd = []
                     for j in range(-5,5):
-                        f_j = npread('ForceCharacterization/' + directions[direction] + '_{}.csv'.format(j))[:, resultingForce]
+                        f_j = npread('ForceCharCL/' + directions[direction] + '_{}.csv'.format(j))[:, resultingForce]
                         stroke_avg_tmp.append(np.mean(f_j[100:]))
                         cmd_tmp = [0,0,0,0,0,0]
                         cmd_tmp[direction] = 0.00001 * j
@@ -72,12 +72,12 @@ class Neural_Network(nn.Module):
     def __init__(self, ):
         super(Neural_Network, self).__init__()
         # parameters
-        self.inputSize = 6
-        self.outputSize = 6
+        self.inputSize = 3
+        self.outputSize = 3
         self.hiddenSize1 = 10
         self.hiddenSize2 = 10
         self.hiddenSize3 = 10
-        self.learning_rate = 0.005
+        self.learning_rate = .001
 
         # weights
         self.W1 = torch.randn(self.inputSize, self.hiddenSize1)
@@ -128,11 +128,12 @@ class Neural_Network(nn.Module):
         # you can reload model with all the weights and so forth with:
         # torch.load("NN")
 
-    def predict(self):
-        xPredicted = torch.tensor([5,0,0,0,0,0],dtype=torch.float)
+    def predict(self, b):
+        xPredicted = torch.tensor(b,dtype=torch.float)
         print ("Predicted data based on trained weights: ")
         print ("Input: \n" + str(xPredicted))
         print ("Output: \n" + str(self.forward(xPredicted)))
+        return xPredicted
 
 if __name__ == "__main__":
     # parseData()
@@ -140,29 +141,43 @@ if __name__ == "__main__":
 
     Y = Y - np.matlib.repmat(Y[5,:],X.shape[0],1)
 
-    rng_state = np.random.get_state()
-    np.random.shuffle(X)
-    np.random.set_state(rng_state)
-    np.random.shuffle(Y)
+    X = X[:,[0,2,4]]
+    Y = Y[:,[0,2,4]]
 
-    train_perc = 0.9
+    mu_X = np.mean(X,0)
+    std_X = np.std(X,0)
+    mu_Y = np.mean(Y,0)
+    std_Y = np.std(Y,0)
+    Y = (Y - mu_Y)/std_Y
+    X = (X - mu_X)/std_X
+
+    # rng_state = np.random.get_state()
+    # np.random.shuffle(X)
+    # np.random.set_state(rng_state)
+    # np.random.shuffle(Y)
+
+    train_perc = 1
     train = range(0,math.floor(X.shape[0]*train_perc))
     test = range(math.floor(X.shape[0]*train_perc),X.shape[0])
-    x_train = torch.from_numpy(X[train,:]*1e5).float()
-    x_test = torch.from_numpy(X[test,:]*1e5).float()
+    x_train = torch.from_numpy(X[train,:]).float()
+    x_test = torch.from_numpy(X[test,:]).float()
     y_train = torch.from_numpy(Y[train,:]).float()
     y_test = torch.from_numpy(Y[test,:]).float()
 
+    b = [0,0,5]
+    b_mod = (b-mu_Y)/std_Y
+
     NN = Neural_Network()
     Loss = []
-    iter = 3000
+    iter = 10000
     for i in range(iter):  # trains the NN 1,000 times
         loss = torch.mean((x_train - NN(y_train))**2).detach().item()
         print ("#" + str(i) + " Loss: " + str(loss))  # mean sum squared loss
         Loss.append(loss)
         NN.train(y_train, x_train)
     NN.saveWeights(NN)
-    NN.predict()
+    xPredicted = NN.predict(b_mod)
+    print(xPredicted*std_X + mu_X)
     plt.plot(range(iter),Loss)
     plt.show()
 

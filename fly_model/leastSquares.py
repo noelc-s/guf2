@@ -101,7 +101,7 @@ A = np.linalg.lstsq(X,Y,rcond=None)
 print(A)
 
 A = A[0].T
-b = [0,1,0,0,0,0]
+b = [0,10,0,0,0,0]
 
 x = cp.Variable(A.shape[1])
 

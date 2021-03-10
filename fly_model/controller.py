@@ -9,6 +9,7 @@ class Controller(object):
             'FL': self.FL,
             'Zero': self.Zero,
             'Constant': self.Constant,
+            'Sin': self.Sin,
         }
         self.controlType = controlType
         self.u = 0
@@ -36,13 +37,16 @@ class Controller(object):
         n2 = dq - self.dq_des
 
         u = - np.multiply(self.Gains[0:6],n1) - np.multiply(self.Gains[6:12],n2)
-        u = np.array([u[0],u[1],u[2],u[3],u[4],0]) + self.u_ff
+        u = np.array([u[0],u[1],u[2],u[3],u[4],u[5]]) + self.u_ff
         # u = np.array([0,0,0,u[3],0,0])
         # u = np.array([0,0,0,u[3],0,0])
         return u
 
     def FL(self, Fly, q, dq):
         return [0,0,0,0,0,0]
+    def Sin(self, Fly, q, dq):
+        tempCont = Controller('PD',self.Gains, self.u_ff *np.sin(10*Fly.sim_time))
+        return tempCont.getControl(Fly,q,dq)
 
     def Zero(self, Fly, q, dq):
         return [0,0,0,0,0,0]

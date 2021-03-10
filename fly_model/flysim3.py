@@ -336,8 +336,8 @@ if __name__ == "__main__":
     dt = 1./1000. # seconds
 
     # gains = np.array([10,50,1,20])*0.000001
-    KP = np.array([0,0,0,50,50,50])*0.000001
-    KD = np.array([0,0,0,20,20,20])*0.000001
+    KP = np.array([0,0,0,50,50,30])*0.000001
+    KD = np.array([0,0,0,20,20,10])*0.000001
     gains = np.concatenate((KP,KD))
 
     # z mode: +- 10 fz (pure vertical)
@@ -345,10 +345,19 @@ if __name__ == "__main__":
     ##### Nomral integration
     # cmd = np.array([0.0,0.0,0.5,0.0,2.0,0.0])*2e-5 ## Hand tuned fx mode
     # cmd = np.array([0.0,0.0,10.0,0.0,0.0,0.0])*1e-5 ## Hand tuned fz mode
-    # cmd = np.array([ 7.3457e-05, 0,-7.4860e-06, 0, 5.4652e-07,0]) ## NN fx
-    # cmd = np.array([-3.6913e-06,0,  2.5984e-05,  0,5.4652e-07,0]) ## NN fz
-    cmd = np.array([-3.6913e-06,0, -7.4860e-06, 0, 3.3121e-05,0]) ## NN my
-    # cmd = np.array([0,0,0,0,0,0])*1e-5
+    # cmd = np.array([ 7.3457e-05, 0,-7.4860e-06, 0, 5.4652e-07,0])*2.4## NN fx
+    # cmd = np.array([-3.6913e-06,0,  2.5984e-05,  0,5.4652e-07,0])*3 ## NN fz
+    # cmd = np.array([-3.6913e-06,0, -4.0956e-05, 0, 5.4652e-07,0])*3 ## NN -fz
+    # cmd = np.array([-3.6913e-06,0, -7.4860e-06, 0, 3.3121e-05,0]) ## NN my
+    # cmd = np.array([ 1.6393e-06,  8.3451e-06, -7.5253e-06,  9.6232e-06, -2.4022e-06,
+    #                  8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 1 fx
+    # cmd = np.array([-1.0503e-05,  8.3451e-06,  1.6175e-05,  9.6232e-06, -2.4022e-06,
+    #                 8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 3 fz
+    # cmd = np.array([-1.0503e-05,  8.3451e-06, -7.5253e-06,  9.6232e-06,  1.6193e-05,
+    #                 8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 3 my
+    # cmd = np.array([5.64620763e-05,0, 2.06880602e-07,0,
+    #                 1.81358623e-06,0])## LS fx
+    cmd = np.array([0,0,0,0,0,0])*1e-5
     fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
     # cmd = np.array([0,0,0,0,0,0])*1e-5
     # cmd = np.array([1.59771730e-06, 0, 1.09018393e-05,
@@ -398,7 +407,7 @@ if __name__ == "__main__":
     # perm = perm.union(set(itertools.permutations([1,1,1,1,1,1],6)))
 
     ## Crosstalk between modes
-    # SimulateData("Thread 1",(162100, 1000000))
+    # SimulateData("Thread 1",(330100, 1000000))
     # _thread.start_new_thread(SimulateData,("Thread 1",(0, 100000)))
     # _thread.start_new_thread(SimulateData,("Thread 2",(100000, 200000)))
     # _thread.start_new_thread(SimulateData,("Thread 3",(200000, 300000)))

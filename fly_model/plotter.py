@@ -47,7 +47,10 @@ for file in range(0,6):
         #     plt.plot(mag[i:i+2],stroke_avg[i:i+2], '.-', lw=3, ms=10, color=mix(red,gray,file/5))
         # for i in np.arange(11):
             # plt.plot(mag[i:i+2],stroke_avg[i:i+2], '.-', lw=3, ms=10)
-        plt.plot(mag,stroke_avg,'.-',lw=2, ms=5)
+        if direction == file:
+            plt.plot(mag,stroke_avg,'-',lw=4, ms=5)
+        else:
+            plt.plot(mag,stroke_avg,'--',lw=2, ms=5)
 plt.legend(directions)
 
 # plt.xlabel("Control Magnitude")

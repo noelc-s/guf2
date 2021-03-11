@@ -15,9 +15,10 @@ import itertools
 
 class Fly(object):
 
-    def __init__(self, startPos, startOrn, startLinVel, startAngVel, dt, gui=True, apply_forces=True, cmd=(0,0,0,0,0,0),controller='Zero',gains=[0,0]):
+    def __init__(self, startPos, startOrn, startLinVel, startAngVel, dt, gui=True, apply_forces=True, cmd=(0,0,0,0,0,0),controller='Zero',gains=[0,0], show_forces = True):
 
         self.apply_forces = apply_forces
+        self.show_forces = show_forces
 
         # Initialize physics and scene
         self.gui = gui
@@ -32,7 +33,7 @@ class Fly(object):
         p.setTimeStep(self.dt)
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
-        p.resetDebugVisualizerCamera(6,50,-35,[0,0,2])
+        p.resetDebugVisualizerCamera(6,0,-35,[0,0,2])
         if self.apply_forces:
             p.setGravity(0,0,-0.5)
         else:
@@ -49,12 +50,13 @@ class Fly(object):
             self.mkBluId = []
 
             # Load markers (for forces)
-            self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-            self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-            self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-            self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-            self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
-            self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+            if self.show_forces:
+                self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+                self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+                self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+                self.mkRedId.append(p.loadURDF("Model/arrow_red.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+                self.mkGrnId.append(p.loadURDF("Model/arrow_green.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
+                self.mkBluId.append(p.loadURDF("Model/arrow_blue.urdf", [1,0,3], p.getQuaternionFromEuler([0,0,0])))
 
         # Generate link and joint index dictionaries
         num_joints = p.getNumJoints(self.flyId)
@@ -133,7 +135,7 @@ class Fly(object):
             wlVel = p.getLinkState(self.flyId, self.link_dict[wing], computeLinkVelocity=1)[6]
             wing_pos, vel_orn = worldPlusVector(self.flyId, self.link_dict[wing], [0,0,1])
 
-            if self.gui:
+            if self.gui and self.show_forces:
                 p.resetBasePositionAndOrientation(self.mkBluId[i], wing_pos, vel_orn)
                 p.resetBasePositionAndOrientation(self.mkRedId[i], wing_pos, vec2q(wlVel))
 
@@ -162,7 +164,7 @@ class Fly(object):
             lever = np.array(p.getLinkState(self.flyId, self.link_dict[wing])[0]) - np.array(p.getBasePositionAndOrientation(self.flyId)[0])
             net_torque += np.cross(lever, lift+drag)
 
-            if self.gui:
+            if self.gui and self.show_forces:
                 p.resetBasePositionAndOrientation(self.mkGrnId[i], wing_pos, vec2q(lift+drag))
 
         p.stepSimulation()
@@ -345,24 +347,27 @@ if __name__ == "__main__":
     ##### Nomral integration
     # cmd = np.array([0.0,0.0,0.5,0.0,2.0,0.0])*2e-5 ## Hand tuned fx mode
     # cmd = np.array([0.0,0.0,10.0,0.0,0.0,0.0])*1e-5 ## Hand tuned fz mode
-    # cmd = np.array([ 7.3457e-05, 0,-7.4860e-06, 0, 5.4652e-07,0])*2.4## NN fx
-    # cmd = np.array([-3.6913e-06,0,  2.5984e-05,  0,5.4652e-07,0])*3 ## NN fz
+    # cmd = np.array([ 7.3457e-05, 0,-7.4860e-06, 0, 5.4652e-07,0])## NN fx
+    # cmd = np.array([-3.6913e-06,0,  2.5984e-05,  0,5.4652e-07,0]) ## NN fz
     # cmd = np.array([-3.6913e-06,0, -4.0956e-05, 0, 5.4652e-07,0])*3 ## NN -fz
     # cmd = np.array([-3.6913e-06,0, -7.4860e-06, 0, 3.3121e-05,0]) ## NN my
     # cmd = np.array([ 1.6393e-06,  8.3451e-06, -7.5253e-06,  9.6232e-06, -2.4022e-06,
     #                  8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 1 fx
-    # cmd = np.array([-1.0503e-05,  8.3451e-06,  1.6175e-05,  9.6232e-06, -2.4022e-06,
+    # cmd = np.array([-1.0503e-05,  8.3451e-06,  3.7489e-07,  9.6232e-06, -2.4022e-06,
     #                 8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 3 fz
     # cmd = np.array([-1.0503e-05,  8.3451e-06, -7.5253e-06,  9.6232e-06,  1.6193e-05,
     #                 8.4112e-06])*np.array([1,0,1,0,1,0]) ## NN2 3 my
     # cmd = np.array([5.64620763e-05,0, 2.06880602e-07,0,
     #                 1.81358623e-06,0])## LS fx
-    cmd = np.array([0,0,0,0,0,0])*1e-5
-    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
+    cmd = np.array([5.64619252e-06,0,- 3.34333264e-09 ,0,1.81351866e-07,0])## LS 1 fx
+    # cmd = np.array([-4.6929e-05,  8.3451e-06, -7.5253e-06,  9.6232e-06, -2.4022e-06,
+    #                 8.4112e-06]*np.array([1,0,1,0,1,0]))
+    # cmd = np.array([0,0,0,0,0,0])*1e-5
+    fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains, show_forces=False)
     # cmd = np.array([0,0,0,0,0,0])*1e-5
     # cmd = np.array([1.59771730e-06, 0, 1.09018393e-05,
     #                 0, 1.57732922e-06, 0]) ## Least squares
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=False, cmd=cmd, controller='Constant',gains = gains)
     tspan = 200/10
     for i in range(int(tspan/dt)):
         fly.get_control()
@@ -382,7 +387,7 @@ if __name__ == "__main__":
     # KD = np.array([0,0,0,20,20,20])*0.000001
     # gains = np.concatenate((KP,KD))
     # cmd = [0,0,0,0,0,0]
-    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains)
+    # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='PD',gains = gains, show_forces = False)
     # # fly = Fly(flyStartPos, flyStartOrn,flyStartLinVel,flyStartAngVel, dt, gui=True, apply_forces=True, cmd=cmd, controller='Constant',gains = gains)
     # directions = ['fx','fy','fz','mx','my','mz']
     # for direction in range(0,6):
@@ -397,7 +402,7 @@ if __name__ == "__main__":
     #             fly.step_simulation()
     #
     #         f1 = np.concatenate((fly.forces, fly.torques), axis = 1)
-    #         npwrite(f1,'ForceCharCL/'+directions[direction]+'_'+str(j)+'.csv')
+            # npwrite(f1,'ForceCharCL/'+directions[direction]+'_'+str(j)+'.csv')
 
     # perm = set(itertools.permutations([1,0,0,0,0,0],6))
     # perm = perm.union(set(itertools.permutations([1,1,0,0,0,0],6)))

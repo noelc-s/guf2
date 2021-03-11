@@ -84,9 +84,9 @@ class Neural_Network(nn.Module):
         # parameters
         self.inputSize = 6
         self.outputSize = 6
-        self.hiddenSize1 = 10
-        self.hiddenSize2 = 10
-        self.hiddenSize3 = 10
+        self.hiddenSize1 = 50
+        self.hiddenSize2 = 50
+        self.hiddenSize3 = 50
         self.learning_rate = .00001
 
         # weights
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # np.random.shuffle(X)
     # np.random.set_state(rng_state)
     # np.random.shuffle(Y)
-    #
+    # #
     # train_perc = 1
     # train = range(0,math.floor(X.shape[0]*train_perc))
     # test = range(math.floor(X.shape[0]*train_perc),X.shape[0])
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     #
     # NN = Neural_Network()
     # Loss = []
-    # iter = 3000
+    # iter = 1000
     # for i in range(iter):  # trains the NN 1,000 times
     #     loss = torch.mean((x_train - NN(y_train))**2).detach().item()
     #     print ("#" + str(i) + " Loss: " + str(loss))  # mean sum squared loss
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     # plt.plot(range(iter),Loss)
     # plt.show()
 
-    b = [1,0,3,0,0,0] + y_offset
+    b = [0,0,1,0,0,0] + y_offset
     b_mod = (b-mu_Y)/std_Y
     NN = Neural_Network()
     NN = NN.loadWeights()
